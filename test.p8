@@ -3,7 +3,8 @@ version 8
 __lua__
 
 function _init()
-  print('hello world')
+  cls()
+  print('hello world', 30, 30)
 end
 
 function _update()
