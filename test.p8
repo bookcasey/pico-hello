@@ -13,87 +13,53 @@ function _init()
   }
 end
 
-function velocity(dimension, direction)
-  -- direction can equal 1 or -1
-  local new_inertia = player['inertia'][dimension] + direction
-  -- 5 is terminal velocity
-  -- 1
-  -- 3
-  -- 6
-  -- printh(player['inertia'][dimension])
-  -- 3 is terminal velocity and magic number
-  if (new_inertia <= 7 and new_inertia >= -7) then
-    player['inertia'][dimension] += direction
-  end
-  -- printh()
-  return player['inertia'][dimension]
-end
-
--- could be moved directly into _draw
-function draw_player()
-  spr(0, player['x'], player['y'])
-end
-
-
-function move(dimension, direction)
-   -- todo: 128-8 is a magic number
-  local new_coord = player[dimension] + direction --velocity(dimension, direction)
-  if (new_coord > 0 and new_coord < (128-8)) then
-     player[dimension] = new_coord
-  else
-     -- printh(new_coord)
-    if (new_coord <= 0) then
-      player[dimension] = 0
-    elseif (new_coord >= 128-8) then
-      player[dimension] = 128-8
-    end
-  end
-end
-
 function _update()
-  -- left
-  if btn(0) then
-    move('x', velocity('x', -1))
-  elseif btn(1) then
-    move('x', velocity('x', 1))
+  if (btn(0)) then
+    if(player['inertia']['x'] > -5) then -- friction
+      player['inertia']['x'] -= 1
+    end
+  elseif (btn(1)) then
+    if(player['inertia']['x'] < 5) then -- friction
+      player['inertia']['x'] += 1
+    end
   else
-    if(player['inertia']['x'] > 0) then
-      player['inertia']['x'] -= 1;
-      move('x', player['inertia']['x'])
-    elseif (player['inertia']['x'] < 0) then
-      player['inertia']['x'] += 1;
-      move('x', player['inertia']['x'])
+    if (player['inertia']['x'] > 0) then
+      player['inertia']['x'] -= 1
+    end
+
+    if (player['inertia']['x'] < 0) then
+      player['inertia']['x'] += 1
     end
   end
 
-  -- up
-  if btn(2) then
-    move('y', -1)
-  elseif btn(3) then
-     move('y', 1)
+  if (btn(2)) then
+    if(player['inertia']['y'] > -5) then -- friction
+      player['inertia']['y'] -= 1
+    end
+  elseif (btn(3)) then
+    if(player['inertia']['y'] < 5) then -- friction
+      player['inertia']['y'] += 1
+    end
   else
-     -- take it down to zero
+    if (player['inertia']['y'] > 0) then
+      player['inertia']['y'] -= 1
+    end
+
+    if (player['inertia']['y'] < 0) then
+      player['inertia']['y'] += 1
+    end
   end
 
-  -- if no controller input
-  -- and we have inertia
-  -- then wind down velocity
 
-  if (not btn(0) and  not btn(1) and player['inertia']['x'] ) then
-    -- if inertia, move it towards 0
-
-  end
-
-  if (not btn(2) and not btn(3)) then
-
-  end
+  player['x'] = player['x'] + player['inertia']['x']
+  player['y'] = player['y'] + player['inertia']['y']
 end
 
 function _draw()
    cls()
    rectfill(0, 0, 128, 128, 3)
    --print(x)
-   draw_player()
+   spr(0, player['x'], player['y'])
 end
 
 __gfx__
