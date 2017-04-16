@@ -1,7 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
+
 function _init()
+  print('hello world')
 end
 
 function _update()
@@ -305,4 +307,3 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-
