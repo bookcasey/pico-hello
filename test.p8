@@ -13,21 +13,6 @@ function _init()
   }
 end
 
-function move(dimension, direction)
-   -- todo: 128-8 is a magic number
-  local new_coord = player[dimension] + direction --velocity(dimension, direction)
-  if (new_coord > 0 and new_coord < (128-8)) then
-     player[dimension] = new_coord
-  else
-     -- printh(new_coord)
-    if (new_coord <= 0) then
-      player[dimension] = 0
-    elseif (new_coord >= 128-8) then
-      player[dimension] = 128-8
-    end
-  end
-end
-
 function _update()
   if (btn(0)) then
     if(player['inertia']['x'] > -5) then -- friction
