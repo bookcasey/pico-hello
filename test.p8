@@ -1,20 +1,43 @@
 pico-8 cartridge // http://www.pico-8.com
 version 8
 __lua__
+
 function _init()
   player={
     x = 0,
     y = 0,
-    x_inertia = 0
+    inertia={
+      x = 0,
+      y = 0
+    }
   }
 end
 
--- open /Applications/PICO-8.app/Contents/MacOS/pico8
+function velocity(dimension, direction)
+  -- direction can equal 1 or -1
+  local new_inertia = player['inertia'][dimension] + direction
+  -- 5 is terminal velocity
+  -- 1
+  -- 3
+  -- 6
+  -- printh(player['inertia'][dimension])
+  -- 3 is terminal velocity and magic number
+  if (new_inertia <= 7 and new_inertia >= -7) then
+    player['inertia'][dimension] += direction
+  end
+  -- printh()
+  return player['inertia'][dimension]
+end
+
+-- could be moved directly into _draw
+function draw_player()
+  spr(0, player['x'], player['y'])
+end
 
 
-function move(dimension, speed)
+function move(dimension, direction)
    -- todo: 128-8 is a magic number
-  local new_coord = player[dimension] + speed
+  local new_coord = player[dimension] + direction --velocity(dimension, direction)
   if (new_coord > 0 and new_coord < (128-8)) then
      player[dimension] = new_coord
   else
@@ -30,23 +53,39 @@ end
 function _update()
   -- left
   if btn(0) then
-    move('x', -10)
---    x -= 1
-  end
-
-  -- right
-  if btn(1) then
-    move('x', 10)
+    move('x', velocity('x', -1))
+  elseif btn(1) then
+    move('x', velocity('x', 1))
+  else
+    if(player['inertia']['x'] > 0) then
+      player['inertia']['x'] -= 1;
+      move('x', player['inertia']['x'])
+    elseif (player['inertia']['x'] < 0) then
+      player['inertia']['x'] += 1;
+      move('x', player['inertia']['x'])
+    end
   end
 
   -- up
   if btn(2) then
-    move('y', -10)
+    move('y', -1)
+  elseif btn(3) then
+     move('y', 1)
+  else
+     -- take it down to zero
   end
 
-  -- down
-  if btn(3) then
-     move('y', 10)
+  -- if no controller input
+  -- and we have inertia
+  -- then wind down velocity
+
+  if (not btn(0) and  not btn(1) and player['inertia']['x'] ) then
+    -- if inertia, move it towards 0
+
+  end
+
+  if (not btn(2) and not btn(3)) then
+
   end
 end
 
@@ -54,8 +93,9 @@ function _draw()
    cls()
    rectfill(0, 0, 128, 128, 3)
    --print(x)
-   spr(0, player['x'], player['y'])
+   draw_player()
 end
+
 __gfx__
 eeeeeeee000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 e000000e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -341,14 +381,4 @@ __music__
 00 41424344
 00 41424344
 00 41424344
-00 41424344
-00 41424344
-00 41424344
-00 41424344
-00 41424344
-00 41424344
-00 41424344
-00 41424344
-00 41424344
-00 41424344
-00 41424344
+00 41424p
