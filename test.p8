@@ -13,59 +13,116 @@ function _init()
   }
 end
 
+
+
+function drain_inertia(dimension)
+  if (player['inertia'][dimension] > 0) then
+    player['inertia'][dimension] -= 1
+  end
+
+  if (player['inertia'][dimension] < 0) then
+    player['inertia'][dimension] += 1
+  end
+end
+
+function hit_wall(new, dimension)
+  -- doesn't just check, also stops the player and inertia
+  if ( new <= 0) then
+    player[dimension] = 0
+    player['inertia'][dimension] = 0
+    return true
+  elseif (new >= 128 - 8) then
+    player[dimension] = 128 - 8
+    player['inertia'][dimension] = 0
+    return true
+  end
+
+  return false
+end
+
+function too_fast()
+  local total_inertia = abs(player['inertia']['x']) + abs(player['inertia']['y'])
+  return total_inertia > 6
+end
+
+function move()
+  if(btn(0) and btn(1)) then
+    drain_inertia('x')
+  elseif (btn(0)) then
+    if(btn(2) or btn(3)) then
+      if(player['inertia']['x'] > -4) then
+        player['inertia']['x'] -= 1
+      end
+    elseif(player['inertia']['x'] > -6) then
+      player['inertia']['x'] -= 1
+    end
+  end
+end
+
 function _update()
-  if (btn(0)) then
-    if(player['inertia']['x'] > -5) then -- friction
+
+  if(btn(0) and btn(1)) then
+    drain_inertia('x')
+  elseif (btn(0)) then
+    if(btn(2) or btn(3)) then
+      if(player['inertia']['x'] > -4) then
+        player['inertia']['x'] -= 1
+      end
+    elseif(player['inertia']['x'] > -6) then
       player['inertia']['x'] -= 1
     end
   elseif (btn(1)) then
-    if(player['inertia']['x'] < 5) then -- friction
+    if(btn(2) or btn(3)) then
+      if(player['inertia']['x'] < 4) then
+        player['inertia']['x'] += 1
+      end
+    elseif(player['inertia']['x'] < 6) then
       player['inertia']['x'] += 1
     end
   else
-    if (player['inertia']['x'] > 0) then
-      player['inertia']['x'] -= 1
-    end
-
-    if (player['inertia']['x'] < 0) then
-      player['inertia']['x'] += 1
-    end
+    drain_inertia('x')
   end
 
-  if (btn(2)) then
-    if(player['inertia']['y'] > -5) then -- friction
+  if(btn(2) and btn(3)) then
+    drain_inertia('y')
+  elseif (btn(2)) then
+    if(btn(0) or btn(1)) then
+      if(player['inertia']['y'] > -4) then
+        player['inertia']['y'] -= 1
+      end
+    elseif(player['inertia']['y'] > -6) then
       player['inertia']['y'] -= 1
     end
   elseif (btn(3)) then
-    if(player['inertia']['y'] < 5) then -- friction
+    if(btn(0) or btn(1)) then
+      if(player['inertia']['y'] < 4) then
+        player['inertia']['y'] += 1
+      end
+    elseif(player['inertia']['y'] < 6) then
       player['inertia']['y'] += 1
     end
   else
-    if (player['inertia']['y'] > 0) then
-      player['inertia']['y'] -= 1
-    end
+    drain_inertia('y')
+  end
 
-    if (player['inertia']['y'] < 0) then
-      player['inertia']['y'] += 1
+  -- prevents diagonal from going to fast, also in the other bit though
+  if (too_fast()) then
+    if (abs(player['inertia']['x']) > abs(player['inertia']['y'])) then
+      drain_inertia('x')
+    end
+    if (abs(player['inertia']['y']) > abs(player['inertia']['x'])) then
+      drain_inertia('y')
     end
   end
 
-  local new_x = player['x'] + player['inertia']['x'];
+  local new_x = player['x'] + player['inertia']['x']
   local new_y = player['y'] + player['inertia']['y']
 
-  if ( new_x <= 0) then
-    player['x'] = 0
-  elseif (new_x >= 128 - 8) then
-    player['x'] = 128 - 8
-  else
+  if (not hit_wall(new_x, 'x')) then
     player['x'] = new_x
   end
 
-  if ( new_y <= 0) then
-    player['y'] = 0
-  elseif (new_y >= 128 - 8) then
-    player['y'] = 128 - 8
-  else
+  if (not hit_wall(new_y, 'y')) then
     player['y'] = new_y
   end
 end
@@ -73,8 +130,10 @@ end
 function _draw()
    cls()
    rectfill(0, 0, 128, 128, 3)
-   --print(x)
    spr(0, player['x'], player['y'])
+   print('x'..abs(player['inertia']['x'])..' y'..abs(player['inertia']['y']), 0, 0, 7)
+   print(too_fast(), 0, 7)
+
 end
 
 __gfx__
